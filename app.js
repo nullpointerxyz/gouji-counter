@@ -29,9 +29,14 @@ const CARD_INFOS = [
 let currentMode = '6e';
 let state = {};
 
+// 够级牌型定义
+const TRACKER_CARDS = ['10', 'J', 'Q', 'K', 'A'];
+let trackerState = {};
+
 const cardsContainer = document.getElementById('cardsContainer');
 const gameModeSelect = document.getElementById('gameMode');
 const btnReset = document.getElementById('btnReset');
+const trackerGrid = document.getElementById('trackerGrid');
 
 // 初始化/重置状态
 function initState() {
@@ -43,6 +48,12 @@ function initState() {
             remaining: config[info.id],
             history: [] // 用于撤销
         };
+    });
+
+    // 初始化追踪器状态
+    trackerState = {};
+    TRACKER_CARDS.forEach(card => {
+        trackerState[card] = false; // 初始未出
     });
 }
 
@@ -122,7 +133,26 @@ function render() {
 
         cardsContainer.appendChild(cardEl);
     });
+
+    // 渲染追踪器
+    trackerGrid.innerHTML = '';
+    TRACKER_CARDS.forEach(card => {
+        const tEl = document.createElement('div');
+        tEl.className = `tracker-card ${trackerState[card] ? 'active' : ''}`;
+        tEl.innerText = card;
+        tEl.onclick = () => toggleTracker(card);
+        trackerGrid.appendChild(tEl);
+    });
 }
+
+// 追踪器切换逻辑
+window.toggleTracker = function (card) {
+    trackerState[card] = !trackerState[card];
+    if (navigator.vibrate) {
+        navigator.vibrate(30);
+    }
+    render();
+};
 
 // 出牌逻辑
 window.playCard = function (id, count) {
